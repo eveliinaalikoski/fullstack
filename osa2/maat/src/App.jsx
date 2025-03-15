@@ -1,5 +1,3 @@
-// TEHTÄVÄ 2.18 TEHTY
-
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 

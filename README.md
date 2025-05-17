@@ -5,4 +5,5 @@
 - osa0
 - osa1
 - osa2: muut paitsi 2.19-20
-- osa3: a
+- osa3
+- osa4: a

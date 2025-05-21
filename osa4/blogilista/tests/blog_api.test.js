@@ -11,27 +11,47 @@ const helper = require('./test_helper')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
+let token
+
 describe('when there is initially some notes saved', () => {
 	beforeEach(async () => {
+		await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('secretpassword', 10)
+    const user = new User({ username: 'tokenuser', passwordHash })
+    await user.save()
+
+		const loginUser = await api
+			.post('/api/login')
+			.send({ username:'tokenuser', password: 'secretpassword'})
+		
+		token = loginUser.body.token
+
 		await Blog.deleteMany({})
-		await Blog.insertMany(helper.initialBlogs)
+		const initialBlogsWithUser = helper.initialBlogs.map(blog => new Blog({ ...blog, user: user.id }))
+		await Blog.insertMany(initialBlogsWithUser)
 	})
 
 	test('blogs are returned as json', async () => {
 		await api
 			.get('/api/blogs')
+			.set({ 'Authorization': `Bearer ${token}` })
 			.expect(200)
 			.expect('Content-Type', /application\/json/)
 	})
 
 	test('all blogs are returned', async () => {
-		const response = await api.get('/api/blogs')
+		const response = await api
+			.get('/api/blogs')
+			.set({ 'Authorization': `Bearer ${token}` })
 
 		assert.strictEqual(response.body.length, helper.initialBlogs.length)
 	})
 
 	test('indentifying field for blogs is id', async () => {
-		const response = await api.get('/api/blogs')
+		const response = await api
+			.get('/api/blogs')
+			.set({ 'Authorization': `Bearer ${token}` })
 
 		for (const blog of response.body) {
 			assert.ok(blog.id)
@@ -51,15 +71,40 @@ describe('when there is initially some notes saved', () => {
 		
 			await api
 				.post('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(newBlog)
 				.expect(201)
 				.expect('Content-Type', /application\/json/)
 		
-			const response = await api.get('/api/blogs')
+			const response = await api
+				.get('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
+
 			const titles = response.body.map(r => r.title)
 		
 			assert.strictEqual(response.body.length, helper.initialBlogs.length+1)
 			assert(titles.includes(newBlog.title))
+		})
+
+		test('fails with status code 401 if there is no token', async () => {
+			const newBlog = {
+				id: "5a422b3a1b54a676234d17f9",
+				title: "Canonical string reduction",
+				author: "Edsger W. Dijkstra",
+				url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+				likes: 12,
+			}
+		
+			const result = await api
+				.post('/api/blogs')
+				.send(newBlog)
+				.expect(401)
+				.expect('Content-Type', /application\/json/)
+
+			const blogsAtEnd = await helper.blogsInDb()
+			
+			assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+			assert(result.body.error.includes('token not found'))
 		})
 		
 		test('if not given a value, field likes gets value zero', async () => {
@@ -72,18 +117,22 @@ describe('when there is initially some notes saved', () => {
 		
 			await api
 				.post('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(newBlog)
 				.expect(201)
 				.expect('Content-Type', /application\/json/)
 		
-			const response = await api.get('/api/blogs')
+			const response = await api
+				.get('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
+
 			const likes = response.body.map(r => r.likes)
 		
 			assert.strictEqual(response.body.length, helper.initialBlogs.length+1)
 			assert(likes.includes(0))
 		})
 		
-		test('can not add a blog without title', async () => {
+		test('fails with status code 400 if there is no title', async () => {
 			const newBlog = {
 				id: "5a422b3a1b54a676234d17f9",
 				author: "Edsger W. Dijkstra",
@@ -93,15 +142,18 @@ describe('when there is initially some notes saved', () => {
 		
 			await api
 				.post('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(newBlog)
 				.expect(400)
 		
-			const response = await api.get('/api/blogs')
+			const response = await api
+				.get('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 		
 			assert.strictEqual(response.body.length, helper.initialBlogs.length)
 		})
 		
-		test('can not add a blog without url', async () => {
+		test('fails with status code 400 if there is no url', async () => {
 			const newBlog = {
 				id: "5a422b3a1b54a676234d17f9",
 				title: "Canonical string reduction",
@@ -111,10 +163,13 @@ describe('when there is initially some notes saved', () => {
 		
 			await api
 				.post('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(newBlog)
 				.expect(400)
 		
-			const response = await api.get('/api/blogs')
+			const response = await api
+				.get('/api/blogs')
+				.set({ 'Authorization': `Bearer ${token}` })
 		
 			assert.strictEqual(response.body.length, helper.initialBlogs.length)
 		})	
@@ -127,6 +182,7 @@ describe('when there is initially some notes saved', () => {
 
 			await api
 				.delete(`/api/blogs/${blogToDelete.id}`)
+				.set({ 'Authorization': `Bearer ${token}` })
 				.expect(204)
 			
 			const blogsAtEnd = await helper.blogsInDb()
@@ -139,13 +195,15 @@ describe('when there is initially some notes saved', () => {
 		test('fails with status code 400 if id is invalid', async () => {
 			const invalidId = '5a422a851b54a676234d17f7'
 
-			await api
+			const result = await api
 				.delete(`/api/blogs/${invalidId}`)
-				.expect(400)
+				.set({ 'Authorization': `Bearer ${token}` })
+				.expect(404)
 			
 			const blogsAtEnd = await helper.blogsInDb()
 			
 			assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+			assert(result.body.error.includes('could not find blog'))
 		})
 	})
 
@@ -158,6 +216,7 @@ describe('when there is initially some notes saved', () => {
 
 			await api
 				.put(`/api/blogs/${blogToUpdate.id}`)
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(updatedBlog)
 				.expect(200)
 			
@@ -174,6 +233,7 @@ describe('when there is initially some notes saved', () => {
 
 			await api
 				.put(`/api/blogs/${invalidId}`)
+				.set({ 'Authorization': `Bearer ${token}` })
 				.send(updatedBlog)
 				.expect(400)
 			

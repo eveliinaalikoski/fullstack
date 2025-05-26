@@ -1,0 +1,25 @@
+h1 {
+    color: orange
+}
+
+h2 {
+    color: orange
+}
+
+.notification {
+    color: green;
+    background: lightgrey;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.errormessage {
+    color: red;
+    background: lightgrey;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}

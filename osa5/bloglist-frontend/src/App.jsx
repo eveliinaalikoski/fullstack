@@ -45,7 +45,7 @@ const App = () => {
     setBlogs([])
   }
 
-  const addBlog = async (newBlog) => {    
+  const addBlog = async (newBlog) => {
     blogFormRef.current.toggleVisibility()
     const { title, author, url } = newBlog
 
@@ -57,7 +57,6 @@ const App = () => {
 
     try {
       const newBlog = await blogService.create({ title, author, url })
-      console.log("BBB", newBlog)
       setBlogs(blogs.concat(newBlog))
       setNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
       setTimeout(() => setNotification(null), 5000)
@@ -69,25 +68,35 @@ const App = () => {
 
   const handleLike = async (blog) => {
     const likedBlog = { ...blog, likes: blog.likes+1 }
-    console.log(likedBlog)
 
     try {
       const updatedBlog = await blogService.like(likedBlog)
-      const updatedBlogWithUser = { ...updatedBlog, user: blog.user }
-      setBlogs(blogs.map(b => b.id !== blog.id ? b : updatedBlogWithUser))
+      setBlogs(blogs.map(b => b.id !== blog.id ? b : updatedBlog))
     } catch (error) {
       setErrorMessage('failed giving a like')
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
 
+  const handleDeletion = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        await blogService.deletion(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        setNotification(`removed blog ${blog.title} by ${blog.author}`)
+        setTimeout(() => setNotification(null), 5000)
+      } catch (error) {
+        setErrorMessage('failed removing a blog')
+        setTimeout(() => setErrorMessage(null), 5000)
+      }
+    }
+  }
 
   useEffect(() => {
     if (user) {
       blogService.getAll().then(blogs =>
         setBlogs(blogs)
       )
-      console.log(blogs)
     }
   }, [user])
 
@@ -106,8 +115,8 @@ const App = () => {
         <LoginForm
           username={username}
           password={password}
-          handleUsernameChange={({target}) => setUsername(target.value)}
-          handlePasswordChange={({target}) => setPassword(target.value)}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
           handleLogin={handleLogin}
         />
       </div>
@@ -133,9 +142,15 @@ const App = () => {
         {blogs
           .sort((a, b) => b.likes - a.likes)
           .map(blog =>
-            <Blog key={blog.id} blog={blog} handleLike={handleLike} />
-        )}
-        </div>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleLike={handleLike}
+              user={user}
+              handleDeletion={handleDeletion}
+            />
+          )}
+      </div>
       }
     </div>
   )

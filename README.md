@@ -7,4 +7,4 @@
 - osa2: muut paitsi 2.19-20
 - osa3
 - osa4
-- osa5: a, 
+- osa5: a, b, 

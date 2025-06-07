@@ -131,7 +131,7 @@ const App = () => {
 
       {!user && loginForm()}
       {user && <div>
-        <p>
+        <p id='logged-in-user'>
           {user.username} logged in <button onClick={handleLogout}>logout</button>
         </p>
         <Toggable buttonLabel='create a new blog' ref={blogFormRef}>

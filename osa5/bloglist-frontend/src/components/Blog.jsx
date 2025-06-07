@@ -33,11 +33,11 @@ const Blog = ({ blog, handleLike, user, handleDeletion }) => {
   )
 }
 
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
-  handleLike: PropTypes.func.isRequired,
-  user: PropTypes.object.isRequired,
-  handleDeletion: PropTypes.func.isRequired
-}
+// Blog.propTypes = {
+//   blog: PropTypes.object.isRequired,
+//   handleLike: PropTypes.func.isRequired,
+//   user: PropTypes.object.isRequired,
+//   handleDeletion: PropTypes.func.isRequired
+// }
 
 export default Blog

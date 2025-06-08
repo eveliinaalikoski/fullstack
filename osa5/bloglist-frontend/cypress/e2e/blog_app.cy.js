@@ -77,14 +77,14 @@ describe('Blog app', function() {
         cy.contains('third title third author').should('not.exist')
       })
       
-      it.only('as owner of first blog, user can see delete button', function() {
+      it('as owner of first blog, user can see delete button', function() {
         cy.contains('first title first author')
           .contains('view')
           .click()
         cy.get('#delete-button')
       })
 
-      it.only('as not the owner of first blog, user can not see delete button', function() {
+      it('as not the owner of first blog, user can not see delete button', function() {
         const user = {
           name: 'Toinen Testaaja',
           username: 'Toka',
@@ -99,6 +99,43 @@ describe('Blog app', function() {
           .click()
         cy.get('#blog-owner').contains('Testeri')
         cy.get('#delete-button').should('not.exist')
+      })
+
+      it('blogs are arranged by amount of likes', function() {
+        cy.get('.blog').eq(0).should('contain', 'first title first author')
+        cy.get('.blog').eq(1).should('contain', 'second title second author')
+        cy.get('.blog').eq(2).should('contain', 'third title third author')
+
+        cy.contains('first title first author')
+          .contains('view')
+          .click()
+        cy.get('#like-button').click()
+        cy.contains('likes 1')
+        cy.contains('hide').click()
+
+        cy.contains('second title second author')
+          .contains('view')
+          .click()
+        cy.get('#like-button').click()
+        cy.contains('likes 1')
+        cy.get('#like-button').click()
+        cy.contains('likes 2')
+        cy.get('#like-button').click()
+        cy.contains('likes 3')
+        cy.contains('hide').click()
+      
+        cy.contains('third title third author')
+          .contains('view')
+          .click()
+        cy.get('#like-button').click()
+        cy.contains('likes 1')
+        cy.get('#like-button').click()
+        cy.contains('likes 2')
+        cy.contains('hide').click()
+
+        cy.get('.blog').eq(0).should('contain', 'second title second author')
+        cy.get('.blog').eq(1).should('contain', 'third title third author')
+        cy.get('.blog').eq(2).should('contain', 'first title first author')
       })
     })
   })

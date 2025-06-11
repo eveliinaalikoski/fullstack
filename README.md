@@ -8,4 +8,4 @@
 - osa3
 - osa4
 - osa5
-- osa6: a, b, 
+- osa6: a, b, c, 

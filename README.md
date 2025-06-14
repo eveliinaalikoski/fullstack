@@ -9,4 +9,4 @@
 - osa4
 - osa5
 - osa6
-- 
+- osa7: a, 

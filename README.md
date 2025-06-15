@@ -9,4 +9,4 @@
 - osa4
 - osa5
 - osa6
-- osa7: a, 
+- osa7: a, b (paitsi 7.6, 7.8), 

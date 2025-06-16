@@ -1,0 +1,66 @@
+h1 {
+  color: blue;
+}
+
+h2 {
+  color: rgb(255, 84, 17);
+}
+
+h3 {
+  color: rgb(255, 123, 0);
+}
+
+.notification {
+  color: green;
+  background: lightgrey;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.errormessage {
+  color: red;
+  background: lightgrey;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.blog {
+  padding-top: 10px;
+  padding-left: 2px;
+  border: solid;
+  border-width: 1px;
+  margin-bottom: 5px;
+  color: blue;
+}
+
+.navlink {
+  float: left;
+  color: blue;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.navlink:hover {
+  background-color: rgb(9, 9, 128);
+}
+
+.navtext {
+  float: left;
+  color: blue;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.navtext button {
+  color: blue;
+}
+
+.navtext button:hover {
+  background-color: rgb(9, 9, 128);
+}
